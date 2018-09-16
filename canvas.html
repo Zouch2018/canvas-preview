@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0">
+    <title>canvas</title>
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_839672_b5o8vdrm2jj.css">
+</head>
+<style>
+
+    * {
+        margin:0;
+        padding:0;
+    }
+    ul>li {
+        list-style: none;
+    }
+    body {
+        overflow: hidden;
+    }
+    canvas {
+        background-color: #fff;
+    }
+    .tools {
+        position: fixed;
+        top:20px;
+        left:20px;
+    }
+    .tools >li {
+        display: inline-block;
+        margin: 0 10px;
+    }
+    .iconfont {
+        font-size: 30px;
+        text-shadow: 2px 3px 4px rgba(0,0,0,0.4);
+        transition: all(0.3s);
+
+    }
+    .color {
+        position: fixed;
+        top:80px;
+        left:30px;
+    }
+    .color>li {
+        width:20px;
+        height:20px;
+        border-radius: 50%;
+        border:1px solid #bebebe;
+        margin: 20px 0;
+
+    }
+    .color .black {
+        background-color: #000;
+    }
+    .color .green {
+        background-color: #00ff00;
+    }
+    .color .red {
+        background-color: #ff0000;
+    }
+    .color .blue {
+        background-color: #0000fa;
+    }
+    .color .yellow {
+        background-color: #ffff00;
+    }
+
+
+
+    .tools li.active {
+        color: #fff57a;
+        transform: scale(1.4);
+    }
+    .currentColor {
+        text-shadow: 6px 8px 14px rgba(0,0,0,0.6);
+        transform: scale(1.4);
+    }
+
+</style>
+<body>
+    <canvas id="canvas"></canvas>
+    <ul class="tools">
+        <li class="pen active"><i class="iconfont icon-pen"></i></li>
+        <li class="eraser"><i class="iconfont icon-eraser "></i></li>
+        <li class="clear"><i class="iconfont icon-clear"></i></li>
+        <li class="download"><i class="iconfont icon-download"></i></li>
+    </ul>
+    <ul class="color">
+        <li class="black currentColor"></li>
+        <li class="red"></li>
+        <li class="green"></li>
+        <li class="blue"></li>
+        <li class="yellow"></li>
+    </ul>
+
+<script>
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+    var $ = function(className){
+        return document.querySelector(className)
+    };
+
+
+    autoSetPageSize(canvas);
+    var using = false;
+    var eraserEnable = false;
+    var eraser = $(".eraser");
+    var pen = $(".pen");
+    var clear = $(".clear");
+    var save = $(".download");
+    var black = $(".black");
+    var red = $(".red");
+    var blue = $(".blue");
+    var green = $(".green");
+    var yellow = $(".yellow");
+
+
+    eraser.onclick = function(){
+        eraserEnable = true;
+        eraser.classList.add("active");
+        pen.classList.remove("active");
+    };
+
+    pen.onclick = function(){
+        eraserEnable =false;
+        pen.classList.add("active");
+        eraser.classList.remove("active");
+    };
+    black.onclick = function(){
+        context.strokeStyle = "rgb(0,0,0)";
+        black.classList.add("currentColor");
+        red.classList.remove("currentColor");
+        green.classList.remove("currentColor");
+        blue.classList.remove("currentColor");
+        yellow.classList.remove("currentColor");
+
+    };
+    red.onclick = function(){
+        context.strokeStyle = "rgb(255,0,0)";
+        red.classList.add("currentColor");
+        black.classList.remove("currentColor");
+        green.classList.remove("currentColor");
+        blue.classList.remove("currentColor");
+        yellow.classList.remove("currentColor");
+
+    };
+    green.onclick = function(){
+        context.strokeStyle = "rgb(0,255,0)";
+        green.classList.add("currentColor");
+        black.classList.remove("currentColor");
+        red.classList.remove("currentColor");
+        blue.classList.remove("currentColor");
+        yellow.classList.remove("currentColor");
+
+    };
+    blue.onclick = function(){
+        context.strokeStyle = "rgb(0,0,255)";
+        blue.classList.add("currentColor");
+        black.classList.remove("currentColor");
+        red.classList.remove("currentColor");
+        green.classList.remove("currentColor");
+        yellow.classList.remove("currentColor");
+
+    };
+    yellow.onclick = function(){
+        context.strokeStyle = "rgb(255,255,0)";
+        yellow.classList.add("currentColor");
+        black.classList.remove("currentColor");
+        red.classList.remove("currentColor");
+        blue.classList.remove("currentColor");
+        green.classList.remove("currentColor");
+
+    };
+
+//    清除画布
+    clear.onclick = function(){
+        context.clearRect(0,0,canvas.width,canvas.height);
+    };
+
+    save.onclick = function(){
+        var url = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+        var a = document.createElement('a')
+        document.body.appendChild(a)
+        a.href = url
+        a.download = 'myPainting.jpg'
+        a.target="_blank"
+        a.click()
+    };
+
+
+
+    var lastPoint = {x:undefined,y:undefined};
+
+
+    listenToDevice(canvas);
+
+    function listenToDevice(canvas){
+
+        if(document.body.ontouchstart !== undefined){
+//            支持触屏设备
+            canvas.ontouchstart = function(e){
+
+                var x = e.touches[0].clientX;
+                var y = e.touches[0].clientY;
+                using = true;
+                if(eraserEnable){
+                    context.clearRect(x-5,y-5,10,10);
+                }else{
+                    lastPoint = {x:x,y:y};
+                }
+            };
+            canvas.ontouchmove =  function(e){
+                var x = e.touches[0].clientX;
+                var y = e.touches[0].clientY;
+                if(using){
+                    if(eraserEnable){
+                        context.clearRect(x-5,y-5,10,10);
+                    }else{
+                        var  newPoint = {
+                            x:x,
+                            y:y
+                        };
+                        drawLine(lastPoint.x,lastPoint.y,newPoint.x,newPoint.y);
+                        lastPoint = newPoint;
+                    }
+                }
+            };
+            canvas.ontouchend = function(){
+                using = false;
+            }
+
+        }else{
+//            不支持触屏设备
+            canvas.onmousedown = function(e){
+                var x = e.clientX;
+                var y = e.clientY;
+                using = true;
+                if(eraserEnable){
+                    context.clearRect(x-5,y-5,10,10);
+                }else{
+                    lastPoint = {x:x,y:y};
+                }
+            };
+            canvas.onmousemove = function(e){
+                var x = e.clientX;
+                var y = e.clientY;
+                if(using){
+                    if(eraserEnable){
+                        context.clearRect(x-5,y-5,10,10);
+                    }else{
+                        var  newPoint = {
+                            x:x,
+                            y:y
+                        };
+                        drawLine(lastPoint.x,lastPoint.y,newPoint.x,newPoint.y);
+                        lastPoint = newPoint;
+                    }
+                }
+            };
+
+            canvas.onmouseup = function(){
+                using = false;
+            }
+        }
+
+    }
+
+
+
+//    设置页面大小
+    function autoSetPageSize(canvas){
+        setPageSize();
+        window.onresize = function(){
+            setPageSize()
+        };
+        function setPageSize(){
+            var pageWidth = document.documentElement.clientWidth;
+            var pageHeight= document.documentElement.clientHeight;
+            canvas.width = pageWidth;
+            canvas.height = pageHeight;
+        }
+    }
+
+
+//    画圆方法
+    function drawCircle(x,y,radius){
+        context.beginPath();
+        context.arc(x,y,radius,0,Math.PI*2);
+        context.fill();
+    }
+//    画线段方法
+    function drawLine(x1,y1,x2,y2){
+        context.beginPath();
+        context.moveTo(x1,y1);
+        context.lineTo(x2,y2);
+        context.lineWidth = 2;
+        context.stroke();
+        context.closePath();
+    }
+
+
+
+
+</script>
+
+</body>
+</html>
