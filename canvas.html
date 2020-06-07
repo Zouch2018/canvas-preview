@@ -71,7 +71,7 @@
 
 
     .tools li.active {
-        color: #fff57a;
+        color: #de4f71;
         transform: scale(1.4);
     }
     .currentColor {
@@ -97,25 +97,26 @@
     </ul>
 
 <script>
-    var canvas = document.getElementById('canvas');
-    var context = canvas.getContext('2d');
-    var $ = function(className){
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+
+    const $ = function(className){
         return document.querySelector(className)
     };
 
 
     autoSetPageSize(canvas);
-    var using = false;
-    var eraserEnable = false;
-    var eraser = $(".eraser");
-    var pen = $(".pen");
-    var clear = $(".clear");
-    var save = $(".download");
-    var black = $(".black");
-    var red = $(".red");
-    var blue = $(".blue");
-    var green = $(".green");
-    var yellow = $(".yellow");
+    let using = false;
+    let eraserEnable = false;
+    let eraser = $(".eraser");
+    let pen = $(".pen");
+    let clear = $(".clear");
+    let save = $(".download");
+    let black = $(".black");
+    let red = $(".red");
+    let blue = $(".blue");
+    let green = $(".green");
+    let yellow = $(".yellow");
 
 
     eraser.onclick = function(){
@@ -181,8 +182,9 @@
     };
 
     save.onclick = function(){
-        var url = canvas.toDataURL("image/png");
-        var a = document.createElement('a');
+
+        let url = canvas.toDataURL("image/jpg");
+        let a = document.createElement('a');
         document.body.appendChild(a);
         a.href = url;
         a.download = 'myPainting.jpg';
@@ -193,7 +195,7 @@
 
 
 
-    var lastPoint = {x:undefined,y:undefined};
+    let lastPoint = {x:undefined,y:undefined};
 
 
     listenToDevice(canvas);
@@ -204,8 +206,8 @@
 //            支持触屏设备
             canvas.ontouchstart = function(e){
 
-                var x = e.touches[0].clientX;
-                var y = e.touches[0].clientY;
+                let x = e.touches[0].clientX;
+                let y = e.touches[0].clientY;
                 using = true;
                 if(eraserEnable){
                     context.clearRect(x-5,y-5,10,10);
@@ -214,13 +216,13 @@
                 }
             };
             canvas.ontouchmove =  function(e){
-                var x = e.touches[0].clientX;
-                var y = e.touches[0].clientY;
+                let x = e.touches[0].clientX;
+                let y = e.touches[0].clientY;
                 if(using){
                     if(eraserEnable){
                         context.clearRect(x-5,y-5,10,10);
                     }else{
-                        var  newPoint = {
+                        let  newPoint = {
                             x:x,
                             y:y
                         };
@@ -236,8 +238,8 @@
         }else{
 //            不支持触屏设备
             canvas.onmousedown = function(e){
-                var x = e.clientX;
-                var y = e.clientY;
+                let x = e.clientX;
+                let y = e.clientY;
                 using = true;
                 if(eraserEnable){
                     context.clearRect(x-5,y-5,10,10);
@@ -246,13 +248,13 @@
                 }
             };
             canvas.onmousemove = function(e){
-                var x = e.clientX;
-                var y = e.clientY;
+                let x = e.clientX;
+                let y = e.clientY;
                 if(using){
                     if(eraserEnable){
                         context.clearRect(x-5,y-5,10,10);
                     }else{
-                        var  newPoint = {
+                        let  newPoint = {
                             x:x,
                             y:y
                         };
@@ -271,17 +273,22 @@
 
 
 
-//    设置页面大小
+//    设置页面大小和背景色
     function autoSetPageSize(canvas){
         setPageSize();
+        setBackground();
         window.onresize = function(){
             setPageSize()
         };
         function setPageSize(){
-            var pageWidth = document.documentElement.clientWidth;
-            var pageHeight= document.documentElement.clientHeight;
+            let pageWidth = document.documentElement.clientWidth;
+            let pageHeight= document.documentElement.clientHeight;
             canvas.width = pageWidth;
             canvas.height = pageHeight;
+        };
+        function setBackground() {
+          context.fillStyle = '#ffffff';
+          context.fillRect(0, 0, canvas.width,canvas.height);
         }
     }
 
@@ -301,9 +308,6 @@
         context.stroke();
         context.closePath();
     }
-
-
-
 
 </script>
 
